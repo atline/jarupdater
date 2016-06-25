@@ -1,0 +1,4 @@
+version=20160625
+dep1.jar=13333345
+dep2.jar=23243243
+main.jar=513589892
