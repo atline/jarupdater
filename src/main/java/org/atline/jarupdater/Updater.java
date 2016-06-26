@@ -18,11 +18,21 @@ public class Updater {
         }
     }
 
-    private static void downloadJar(String updateSite, String jarString) {
+    private static void downloadJar(String updateSite, String jarRepo, String jarString) {
         String str = HttpClientUtil.httpPost(updateSite + "/" + jarString, null);
 
         try {
-            FileOutputStream fos = new FileOutputStream(PathUtil.getPath() + "/" + jarString);
+            String jarRepoPath = "";
+            if ("".equals(jarRepo)) {
+                jarRepoPath = PathUtil.getPath();
+            } else {
+                jarRepoPath = PathUtil.getPath() + "/" + jarRepo;
+                File f = new File(jarRepoPath);
+                if (!f.exists() && !f.isDirectory()) {
+                    f.mkdirs();
+                }
+            }
+            FileOutputStream fos = new FileOutputStream(jarRepoPath + "/" + jarString);
             fos.write(str.getBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -31,7 +41,7 @@ public class Updater {
         }
     }
 
-    public static void update(String updateSite) {
+    public static void update(String updateSite, String jarRepo) {
         // get remote version info
         String remoteVersion = "";
         HashMap<String , String> remoteJarMap = new HashMap<String , String>();
@@ -91,7 +101,7 @@ public class Updater {
                     Object val = entry.getValue();
 
                     if (!val.equals(localJarMap.get(key))) {
-                        downloadJar(updateSite, (String) key);
+                        downloadJar(updateSite, jarRepo, (String) key);
                     }
 
                     localJarMap.remove(key);
@@ -102,9 +112,14 @@ public class Updater {
                 while (localIter.hasNext()) {
                     Map.Entry entry = (Map.Entry) localIter.next();
                     Object key = entry.getKey();
-                    System.out.println(key);
 
-                    File f = new File(PathUtil.getPath() + "/" + key);
+                    String jarRepoPath = "";
+                    if ("".equals(jarRepo)) {
+                        jarRepoPath = PathUtil.getPath();
+                    } else {
+                        jarRepoPath = PathUtil.getPath() + "/" + jarRepo;
+                    }
+                    File f = new File(jarRepoPath + "/" + key);
                     if (f.exists()) {
                         f.delete();
                     }

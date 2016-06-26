@@ -24,9 +24,10 @@ public class AppMain {
             InputStream is = new BufferedInputStream(new FileInputStream(settings));
             Properties p = new Properties();
             p.load(is);
-            String v = p.getProperty("updatesite");
-            if (null != v) {
-                Updater.update(v);
+            String updatesite = p.getProperty("updatesite");
+            String jarrepo = p.getProperty("jarrepo", "");
+            if (null != updatesite) {
+                Updater.update(updatesite, jarrepo);
             } else {
                 System.out.println("Wrong updatesite settings.");
                 System.exit(1);
