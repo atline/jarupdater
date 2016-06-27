@@ -1,5 +1,6 @@
 package org.atline.jarupdater.utils;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -14,6 +15,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +39,19 @@ public class HttpClientUtil {
         headers.put("Accept-Encoding", "gzip, deflate");
     }
 
-    public static String httpPost(String url, Map<String, Object> param) {
+    public static boolean downloadBinary(String url, Map<String, Object> param, FileOutputStream fos) {
+        if ("ok".equals(httpPost(url, param, fos))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static String getInfo(String url, Map<String, Object> param) {
+        return httpPost(url, param, null);
+    }
+
+    public static String httpPost(String url, Map<String, Object> param, FileOutputStream fos) {
         DefaultHttpClient httpclient = null;
         HttpPost httpPost = null;
         HttpResponse response = null;
@@ -76,8 +92,15 @@ public class HttpClientUtil {
             } else {
                 entity = response.getEntity();
                 if (null != entity) {
-                    byte[] bytes = EntityUtils.toByteArray(entity);
-                    result = new String(bytes, "UTF-8");
+                    if (null == fos) {
+                        byte[] bytes = EntityUtils.toByteArray(entity);
+                        result = new String(bytes, "UTF-8");
+                    } else {
+                        InputStream fis = entity.getContent();
+                        IOUtils.copy(fis, fos);
+                        fos.flush();
+                        result = "ok";
+                    }
                 } else {
                 }
                 return result;

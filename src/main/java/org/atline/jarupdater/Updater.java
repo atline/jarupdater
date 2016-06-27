@@ -19,8 +19,6 @@ public class Updater {
     }
 
     private static void downloadJar(String updateSite, String jarRepo, String jarString) {
-        String str = HttpClientUtil.httpPost(updateSite + "/" + jarString, null);
-
         try {
             String jarRepoPath = "";
             if ("".equals(jarRepo)) {
@@ -32,8 +30,9 @@ public class Updater {
                     f.mkdirs();
                 }
             }
+
             FileOutputStream fos = new FileOutputStream(jarRepoPath + "/" + jarString);
-            fos.write(str.getBytes());
+            HttpClientUtil.downloadBinary(updateSite + "/" + jarString, null, fos);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -45,7 +44,7 @@ public class Updater {
         // get remote version info
         String remoteVersion = "";
         HashMap<String , String> remoteJarMap = new HashMap<String , String>();
-        String str = HttpClientUtil.httpPost(updateSite + "/version.txt", null);
+        String str = HttpClientUtil.getInfo(updateSite + "/version.txt", null);
 
         Properties pOutput = new Properties();
         Properties pRemote = new Properties();
