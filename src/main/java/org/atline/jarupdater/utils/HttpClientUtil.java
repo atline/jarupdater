@@ -6,6 +6,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
@@ -39,21 +40,21 @@ public class HttpClientUtil {
         headers.put("Accept-Encoding", "gzip, deflate");
     }
 
-    public static boolean downloadBinary(String url, Map<String, Object> param, FileOutputStream fos) {
-        if ("ok".equals(httpPost(url, param, fos))) {
+    public static boolean downloadBinary(String url, FileOutputStream fos) {
+        if ("ok".equals(httpGet(url, fos))) {
             return true;
         } else {
             return false;
         }
     }
 
-    public static String getInfo(String url, Map<String, Object> param) {
-        return httpPost(url, param, null);
+    public static String getInfo(String url) {
+        return httpGet(url, null);
     }
 
-    public static String httpPost(String url, Map<String, Object> param, FileOutputStream fos) {
+    public static String httpGet(String url, FileOutputStream fos) {
         DefaultHttpClient httpclient = null;
-        HttpPost httpPost = null;
+        HttpGet httpGet = null;
         HttpResponse response = null;
         HttpEntity entity = null;
         String result = "";
@@ -62,32 +63,21 @@ public class HttpClientUtil {
             httpclient = new DefaultHttpClient();
             httpclient.getParams().setParameter(ClientPNames.COOKIE_POLICY,
                     CookiePolicy.BROWSER_COMPATIBILITY);
-            httpPost = new HttpPost(url);
+            httpGet = new HttpGet(url);
 
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                httpPost.setHeader(entry.getKey(), entry.getValue());
+                httpGet.setHeader(entry.getKey(), entry.getValue());
             }
-            List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-
-            if (null != param) {
-                for (Map.Entry<String, Object> set : param.entrySet()) {
-                    String key = set.getKey();
-                    String value = set.getValue() == null ? "" : set.getValue()
-                            .toString();
-                    nvps.add(new BasicNameValuePair(key, value));
-                    suf.append(" [" + key + "-" + value + "] ");
-                }
-            }
-            httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 
             HttpConnectionParams.setConnectionTimeout(httpclient.getParams(),
-                    10000);
-
-            HttpConnectionParams.setSoTimeout(httpPost.getParams(),
-                    10000);
-            response = httpclient.execute(httpPost);
+                    30000);
+            HttpConnectionParams.setSoTimeout(httpGet.getParams(),
+                    30000);
+            response = httpclient.execute(httpGet);
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
+                System.out.println("Status Code: " + statusCode);
+                System.out.println("Status Reason: " + response.getStatusLine().getReasonPhrase());
                 return "";
             } else {
                 entity = response.getEntity();

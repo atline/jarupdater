@@ -32,7 +32,7 @@ public class Updater {
             }
 
             FileOutputStream fos = new FileOutputStream(jarRepoPath + "/" + jarString);
-            HttpClientUtil.downloadBinary(updateSite + "/" + jarString, null, fos);
+            HttpClientUtil.downloadBinary(updateSite + "/" + jarString, fos);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -44,7 +44,7 @@ public class Updater {
         // get remote version info
         String remoteVersion = "";
         HashMap<String , String> remoteJarMap = new HashMap<String , String>();
-        String str = HttpClientUtil.getInfo(updateSite + "/version.txt", null);
+        String str = HttpClientUtil.getInfo(updateSite + "/version.txt");
 
         Properties pOutput = new Properties();
         Properties pRemote = new Properties();
