@@ -84,6 +84,8 @@ public class Updater {
             HashMap<String , String> localJarMap = new HashMap<String , String>();
 
             if (!localVersion.equals(remoteVersion)) {
+                System.out.println("Download update site changes, waiting ...");
+
                 Enumeration en = pLocal.propertyNames();
                 while (en.hasMoreElements()){
                     String k = (String) en.nextElement();
